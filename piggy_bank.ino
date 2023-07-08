@@ -3,11 +3,26 @@
 #include <String>
 #include <LTE.h>
 #include <Camera.h>
+#include <SDHCI.h>
+#include <Audio.h>
 
+/* LTE関連 */
 LTE lteAccess;
 LTEClient client;
 SipfClient sipfClient;
+
+/* output Level(貯金額Level)関連 */
 uint8_t old_level = 1;
+
+/* 関数宣言 */
+void setup(void);
+uint8_t level_get(void);
+void output_GPIO_level1(void);
+void output_GPIO_level2(void);
+void output_GPIO_level3(void);
+void send_level_to_M5(uint8_t level);
+void loop(void);
+
 
 void setup() {
   char apn[LTE_NET_APN_MAXLEN] = APP_LTE_APN;
@@ -15,20 +30,16 @@ void setup() {
   char user_name[LTE_NET_USER_MAXLEN] = APP_LTE_USER_NAME;
   char password[LTE_NET_PASSWORD_MAXLEN] = APP_LTE_PASSWORD;
 
-  // M5への出力(初期値：Level.1)
-  pinMode(31, OUTPUT); //Level.3用
-  pinMode(32, OUTPUT); //Level.2用
-  pinMode(07, OUTPUT); //Level.1用
-  pinMode(LED3, OUTPUT);
+  /* M5への出力用初期設定 */
+  // M5への出力用ポートのモード設定
+  pinMode(31, OUTPUT);  //Level.3用
+  pinMode(32, OUTPUT);  //Level.2用
+  pinMode(07, OUTPUT);  //Level.1用
+  pinMode(LED3, OUTPUT);  //デバッグ用
   pinMode(LED2, OUTPUT);
   pinMode(LED1, OUTPUT);
-
-  digitalWrite(31, LOW);  
-  digitalWrite(32, LOW);
-  digitalWrite(07, HIGH);
-  digitalWrite(LED3, LOW);  //デバッグ用
-  digitalWrite(LED2, LOW);
-  digitalWrite(LED1, HIGH);
+  // M5への出力(初期値：Level.1)
+  output_GPIO_level1();
 
 
   // initialize serial communications and wait for port to open:
@@ -133,8 +144,8 @@ uint8_t level_get() {
   return revel;
 }
 
-void output_GPIO_level1(){
-  digitalWrite(31, LOW);  
+void output_GPIO_level1() {
+  digitalWrite(31, LOW);
   digitalWrite(32, LOW);
   digitalWrite(07, HIGH);
   digitalWrite(LED3, LOW);  //デバッグ用
@@ -143,8 +154,8 @@ void output_GPIO_level1(){
   return;
 }
 
-void output_GPIO_level2(){
-  digitalWrite(31, LOW);  
+void output_GPIO_level2() {
+  digitalWrite(31, LOW);
   digitalWrite(32, HIGH);
   digitalWrite(07, LOW);
   digitalWrite(LED3, LOW);  //デバッグ用
@@ -153,8 +164,8 @@ void output_GPIO_level2(){
   return;
 }
 
-void output_GPIO_level3(){
-  digitalWrite(31, HIGH);  
+void output_GPIO_level3() {
+  digitalWrite(31, HIGH);
   digitalWrite(32, LOW);
   digitalWrite(07, LOW);
   digitalWrite(LED3, HIGH);  //デバッグ用
@@ -163,9 +174,8 @@ void output_GPIO_level3(){
   return;
 }
 
-void send_level_to_M5(uint8_t level)
-{
-  switch (level){
+void send_level_to_M5(uint8_t level) {
+  switch (level) {
     case 1:
       output_GPIO_level1();
       break;
@@ -179,7 +189,7 @@ void send_level_to_M5(uint8_t level)
       printf("level error : %d", level);
   }
   return;
-} 
+}
 
 void loop() {
 
